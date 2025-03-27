@@ -78,12 +78,12 @@ runs:
         CONFIG_OPTION=""
         CONFIG_FILE="extended_ruleset_path.yml"
         if [[ "${{ inputs.use_extended_ruleset }}" == "true" ]]; then
-            if [[ "${{ inputs.use_extended_ruleset }}" =~ ^https?:// ]]; then
-                echo "Downloading ruleset from ${{ inputs.use_extended_ruleset }}..."
-                curl -L -o "$CONFIG_FILE" "${{ inputs.use_extended_ruleset }}"
+            if [[ "${{ inputs.extended_ruleset_path }}" =~ ^https?:// ]]; then
+                echo "Downloading ruleset from ${{ inputs.extended_ruleset_path }}..."
+                curl -L -o "$CONFIG_FILE" "${{ inputs.extended_ruleset_path }}"
             else
-                echo "Using local ruleset from ${{ inputs.use_extended_ruleset }}..."
-                mv "${{ inputs.use_extended_ruleset }}" "$CONFIG_FILE"
+                echo "Using local ruleset from ${{ inputs.extended_ruleset_path }}..."
+                cp "${{ inputs.extended_ruleset_path }}" "$CONFIG_FILE"
             fi
             CONFIG_OPTION="--config $CONFIG_FILE"
         else
