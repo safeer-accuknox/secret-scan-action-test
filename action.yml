@@ -52,9 +52,17 @@ inputs:
   huggingface_token:
     description: "Huggingface Token (required if secret_scan_type is 'huggingface')"
     required: false
-
+    
   bucket_name:
     description: "S3 Bucket Name (required if secret_scan_type is 's3')"
+    required: false
+
+  aws_access_key_id:
+    description: "AWS Access Key ID (required if secret_scan_type is 's3')"
+    required: false
+
+  aws_secret_access_key:
+    description: "AWS Secret Access Key (required if secret_scan_type is 's3')"
     required: false
 
   use_extended_ruleset:
@@ -147,12 +155,20 @@ runs:
             echo "Error: 'bucket_name' input is required when secret_scan_type is 's3'."
             exit 1
           fi
+          if [[ -z "${{ inputs.aws_access_key_id }}" ]]; then
+            echo "Error: aws_access_key_id is missing!, this input is required when secret_scan_type is 's3'"
+            exit 1
+          fi
+          if [[ -z "${{ inputs.aws_secret_access_key }}" ]]; then
+            echo "Error: aws_secret_access_key is missing!, this input is required when secret_scan_type is 's3'"
+            exit 1
+          fi
           BUCKET_FLAG="--bucket=${{ inputs.bucket_name }}"
         fi
 
-        echo docker run --rm -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $BUCKET_FLAG $DATASET_FLAG $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS 
+        echo docker run --rm -e AWS_ACCESS_KEY_ID="${{ inputs.aws_access_key_id }}" -e AWS_SECRET_ACCESS_KEY="${{ inputs.aws_secret_access_key }}" -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $BUCKET_FLAG $DATASET_FLAG $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS 
         
-        docker run --rm -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $BUCKET_FLAG $DATASET_FLAG $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
+        docker run --rm -e AWS_ACCESS_KEY_ID="${{ inputs.aws_access_key_id }}" -e AWS_SECRET_ACCESS_KEY="${{ inputs.aws_secret_access_key }}" -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $BUCKET_FLAG $DATASET_FLAG $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
         
         echo "TRUFFLEHOG_EXIT_CODE=${exit_code:-0}" >> $GITHUB_ENV
       shell: bash
