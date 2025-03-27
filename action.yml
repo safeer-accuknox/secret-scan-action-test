@@ -93,8 +93,10 @@ runs:
           fi
         fi
 
-        docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 git file:///pwd \
-            --json --no-update $BRANCH_FLAG $RESULTS_FLAG $EXTENDED_RULESET $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
+        echo docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 git file:///pwd --json --no-update $BRANCH_FLAG $RESULTS_FLAG $EXTENDED_RULESET $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
+        
+        docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 git file:///pwd --json --no-update $BRANCH_FLAG $RESULTS_FLAG $EXTENDED_RULESET $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
+        
         echo "TRUFFLEHOG_EXIT_CODE=${exit_code:-0}" >> $GITHUB_ENV
       shell: bash
 
