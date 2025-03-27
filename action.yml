@@ -44,7 +44,7 @@ inputs:
   extended_ruleset_path:
     description: "Path or URL for the extended ruleset"
     required: false
-    default: "config.yml"
+    default: "https://raw.githubusercontent.com/safeer-accuknox/secret-scan-action-test/refs/heads/main/config.yml"
 
   args:
     description: "Additional arguments to pass."
@@ -75,9 +75,19 @@ runs:
           EXTRA_ARGS="${{ inputs.args }}"
         fi
 
-        EXTENDED_RULESET=""
+        CONFIG_OPTION=""
+        CONFIG_FILE="extended_ruleset_path.yml"
         if [[ "${{ inputs.use_extended_ruleset }}" == "true" ]]; then
-            EXTENDED_RULESET="--config config.yml"
+            if [[ "${{ inputs.use_extended_ruleset }}" =~ ^https?:// ]]; then
+                echo "Downloading ruleset from ${{ inputs.use_extended_ruleset }}..."
+                curl -L -o "$CONFIG_FILE" "${{ inputs.use_extended_ruleset }}"
+            else
+                echo "Using local ruleset from ${{ inputs.use_extended_ruleset }}..."
+                mv "${{ inputs.use_extended_ruleset }}" "$CONFIG_FILE"
+            fi
+            CONFIG_OPTION="--config $CONFIG_FILE"
+        else
+            CONFIG_OPTION=""
         fi
 
         BRANCH_FLAG=""
@@ -93,9 +103,9 @@ runs:
           fi
         fi
 
-        echo docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 git file:///pwd --json --no-update $BRANCH_FLAG $RESULTS_FLAG $EXTENDED_RULESET $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS
+        echo docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 git file:///pwd --json --no-update $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS
         
-        docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 git file:///pwd --json --no-update $BRANCH_FLAG $RESULTS_FLAG $EXTENDED_RULESET $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
+        docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 git file:///pwd --json --no-update $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
         
         # echo "TRUFFLEHOG_EXIT_CODE=${exit_code:-0}" >> $GITHUB_ENV
       shell: bash
