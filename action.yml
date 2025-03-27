@@ -1,4 +1,4 @@
-name: AccuKnox Secret Scan
+name: AccuKnox Secret Scan: TEST
 description: Scan secrets in your repository and send the results to AccuKnox.
 
 inputs:
@@ -40,6 +40,11 @@ inputs:
     description: "Enable extended regex rules for detecting sensitive data"
     required: false
     default: "false"
+
+  extended_ruleset_path:
+    description: "Path or URL for the extended ruleset"
+    required: false
+    default: "config.yml"
 
   args:
     description: "Additional arguments to pass."
