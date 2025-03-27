@@ -76,7 +76,7 @@ runs:
         fi
 
         EXTENDED_RULESET=""
-        if [[ "$USE_EXTENDED_RULESET" == "true" ]]; then
+        if [[ "${{ inputs.use_extended_ruleset }}" == "true" ]]; then
             EXTENDED_RULESET="--config config.yml"
         fi
 
