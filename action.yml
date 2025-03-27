@@ -137,9 +137,9 @@ runs:
           DATASET_FLAG="--dataset=${{ inputs.dataset }}"
         fi
 
-        echo docker run --rm -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS 
+        echo docker run --rm -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $DATASET_FLAG $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS 
         
-        docker run --rm -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
+        docker run --rm -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $DATASET_FLAG $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
         
         echo "TRUFFLEHOG_EXIT_CODE=${exit_code:-0}" >> $GITHUB_ENV
       shell: bash
