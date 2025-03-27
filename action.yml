@@ -85,7 +85,7 @@ runs:
                 echo "Using local ruleset from ${{ inputs.extended_ruleset_path }}..."
                 cp "${{ inputs.extended_ruleset_path }}" "$CONFIG_FILE"
             fi
-            CONFIG_OPTION="--config $CONFIG_FILE"
+            CONFIG_OPTION="--config /$CONFIG_FILE"
         else
             CONFIG_OPTION=""
         fi
@@ -105,7 +105,7 @@ runs:
 
         echo docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 git file:///pwd --json --no-update $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS
         
-        docker run --rm -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 git file:///pwd --json --no-update $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
+        docker run --rm -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 git file:///pwd --json --no-update $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
         
         # echo "TRUFFLEHOG_EXIT_CODE=${exit_code:-0}" >> $GITHUB_ENV
       shell: bash
