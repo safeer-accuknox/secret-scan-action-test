@@ -53,6 +53,10 @@ inputs:
     description: "Huggingface Token (required if secret_scan_type is 'huggingface')"
     required: false
 
+  bucket_name:
+    description: "S3 Bucket Name (required if secret_scan_type is 's3')"
+    required: false
+
   use_extended_ruleset:
     description: "Enable extended regex rules for detecting sensitive data"
     required: false
@@ -136,10 +140,19 @@ runs:
           fi
           DATASET_FLAG="--dataset=${{ inputs.dataset }}"
         fi
+        BUCKET_FLAG=""
+        if [[ "${{ inputs.secret_scan_type }}" == "s3" ]]; then
+          SECRET_SCAN_TYPE="s3"
+          if [[ -z "${{ inputs.bucket_name }}" ]]; then
+            echo "Error: 'bucket_name' input is required when secret_scan_type is 's3'."
+            exit 1
+          fi
+          BUCKET_FLAG="--bucket=${{ inputs.bucket_name }}"
+        fi
 
-        echo docker run --rm -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $DATASET_FLAG $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS 
+        echo docker run --rm -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $BUCKET_FLAG $DATASET_FLAG $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS 
         
-        docker run --rm -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $DATASET_FLAG $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
+        docker run --rm -e HUGGINGFACE_TOKEN="${{ inputs.huggingface_token }}" -v $PWD/extended_ruleset_path.yml:/extended_ruleset_path.yml -v "$PWD:/pwd" trufflesecurity/trufflehog:3.88.1 $SECRET_SCAN_TYPE --json --no-update $BUCKET_FLAG $DATASET_FLAG $BRANCH_FLAG $RESULTS_FLAG $CONFIG_OPTION $FAIL_FLAG $EXCLUDE_FLAG $EXTRA_ARGS > trufflehog-results.json || exit_code=$?
         
         echo "TRUFFLEHOG_EXIT_CODE=${exit_code:-0}" >> $GITHUB_ENV
       shell: bash
