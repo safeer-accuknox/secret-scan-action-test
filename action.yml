@@ -1,4 +1,4 @@
-name: AccuKnox Secret Scan: TEST
+name: AccuKnox Secret Scan TEST
 description: Scan secrets in your repository and send the results to AccuKnox.
 
 inputs:
