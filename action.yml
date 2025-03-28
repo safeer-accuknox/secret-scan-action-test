@@ -79,6 +79,11 @@ inputs:
     description: "Additional arguments to pass."
     required: false
 
+  upload_artifact:
+    description: 'Upload the scan results as a GitHub artifact'
+    required: true
+    default: 'true'
+
 runs:
   using: "composite"
   steps:
@@ -189,6 +194,14 @@ runs:
               exit 1
             fi
       shell: bash
+
+    - name: Upload Scan Results as Artifact
+      if: inputs.upload_artifact == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: scan-results-${{ github.sha }}
+        path: trufflehog-results.json
+        if-no-files-found: ignore
 
     - name: Quality Check with exit_code
       if: env.TRUFFLEHOG_EXIT_CODE == '183'
